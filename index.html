@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Imposter — Pass &amp; Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121218;
+    --bg-2:#1b1b24;
+    --paper:#ece5d3;
+    --paper-shadow:#c9c0a8;
+    --ink:#1d1a14;
+    --ink-soft:#4a4536;
+    --accent:#e8b34a;
+    --accent-dim:#7a5f26;
+    --danger:#c1443c;
+    --danger-dim:#5c211d;
+    --muted:#6f6f7c;
+    --line:#33333f;
+    --radius:14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 50% -10%, #23232f 0%, var(--bg) 55%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    color:var(--paper);
+    font-family:'IBM Plex Mono', monospace;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  .stage{
+    width:100%;
+    max-width:420px;
+  }
+
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:0.28em;
+    text-transform:uppercase;
+    color:var(--muted);
+    text-align:center;
+    margin:0 0 6px;
+  }
+
+  h1.title{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:64px;
+    letter-spacing:0.08em;
+    text-align:center;
+    margin:0 0 2px;
+    color:var(--paper);
+    text-shadow:0 0 24px rgba(232,179,74,0.18);
+  }
+
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:0.08em;
+    margin:0 0 28px;
+    text-transform:uppercase;
+  }
+
+  .card{
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    position:relative;
+    box-shadow:0 20px 50px -20px rgba(0,0,0,0.6);
+  }
+
+  .stamp{
+    position:absolute;
+    top:-14px;
+    right:18px;
+    border:2px solid var(--danger);
+    color:var(--danger);
+    font-family:'Bebas Neue', sans-serif;
+    font-size:13px;
+    letter-spacing:0.18em;
+    padding:4px 10px;
+    transform:rotate(6deg);
+    background:var(--bg);
+    border-radius:3px;
+    opacity:0.85;
+  }
+
+  .field-label{
+    font-size:11px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .field-label::before{
+    content:"";
+    width:6px;height:6px;
+    background:var(--accent);
+    border-radius:50%;
+    box-shadow:0 0 8px var(--accent);
+  }
+
+  .stepper{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:24px;
+  }
+  .stepper-count{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:36px;
+    letter-spacing:0.05em;
+    min-width:90px;
+    text-align:center;
+  }
+  .stepper-sub{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    letter-spacing:0.15em;
+    color:var(--muted);
+    margin-top:-2px;
+  }
+  .step-btn{
+    width:44px;
+    height:44px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--paper);
+    font-size:20px;
+    font-family:'IBM Plex Mono', monospace;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.15s, transform 0.1s, opacity 0.15s;
+  }
+  .step-btn:active{transform:scale(0.92);}
+  .step-btn:hover:not(:disabled){background:#26262f;}
+  .step-btn:disabled{opacity:0.3; cursor:not-allowed;}
+
+  .categories{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-bottom:28px;
+  }
+  .cat-btn{
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:var(--muted);
+    padding:16px 6px 12px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+    text-align:center;
+    transition:all 0.15s;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+  }
+  .cat-btn .glyph{
+    font-size:22px;
+    line-height:1;
+    filter:grayscale(1) brightness(0.8);
+    transition:filter 0.15s;
+  }
+  .cat-btn:hover{border-color:#4a4a58; color:var(--paper);}
+  .cat-btn.selected{
+    border-color:var(--accent);
+    color:var(--accent);
+    background:linear-gradient(180deg, rgba(232,179,74,0.1), rgba(232,179,74,0.02));
+    box-shadow:0 0 0 1px var(--accent) inset, 0 0 18px -4px rgba(232,179,74,0.5);
+  }
+  .cat-btn.selected .glyph{filter:none;}
+
+  .btn-primary{
+    width:100%;
+    padding:16px;
+    border-radius:10px;
+    border:none;
+    background:var(--accent);
+    color:#1a1305;
+    font-family:'Bebas Neue', sans-serif;
+    font-size:22px;
+    letter-spacing:0.14em;
+    cursor:pointer;
+    transition:transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+    box-shadow:0 8px 24px -8px rgba(232,179,74,0.6);
+  }
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-primary:disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+    box-shadow:none;
+  }
+
+  .hint{
+    text-align:center;
+    font-size:10.5px;
+    color:var(--muted);
+    margin-top:14px;
+    letter-spacing:0.03em;
+  }
+
+  .hidden{display:none !important;}
+
+  .pass-label{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:15px;
+    letter-spacing:0.2em;
+    color:var(--muted);
+    text-align:center;
+    margin-bottom:2px;
+  }
+  .pass-name{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:46px;
+    letter-spacing:0.05em;
+    text-align:center;
+    color:var(--paper);
+    margin:0 0 6px;
+  }
+  .pass-instruction{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.6;
+    margin-bottom:22px;
+  }
+
+  .redact-wrap{
+    position:relative;
+    height:190px;
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--paper);
+    box-shadow:0 4px 0 var(--paper-shadow), 0 20px 40px -16px rgba(0,0,0,0.7);
+    margin-bottom:20px;
+    border:1px solid #00000022;
+  }
+  .redact-content{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+  }
+  .word-text{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:40px;
+    letter-spacing:0.04em;
+    color:var(--ink);
+    line-height:1.05;
+  }
+  .imposter-text{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:34px;
+    letter-spacing:0.06em;
+    color:var(--danger);
+  }
+  .category-tag{
+    position:absolute;
+    top:10px;
+    left:12px;
+    font-size:9px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    opacity:0.6;
+  }
+
+  .redact-bar{
+    position:absolute;
+    inset:0;
+    background:
+      repeating-linear-gradient(135deg, #000 0, #000 10px, #0a0a0a 10px, #0a0a0a 20px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+    transition:transform 0.28s cubic-bezier(.4,0,.2,1);
+    z-index:2;
+  }
+  .redact-bar.lifted{
+    transform:translateY(-100%);
+    transition:transform 0.15s cubic-bezier(.4,0,.2,1);
+  }
+  .redact-label{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:20px;
+    letter-spacing:0.3em;
+    color:#7c7c86;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .redact-label small{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    letter-spacing:0.12em;
+    color:#55555f;
+    text-transform:none;
+  }
+
+  .btn-row{
+    display:flex;
+    gap:10px;
+  }
+  .btn-secondary{
+    flex:1;
+    padding:15px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--muted);
+    font-family:'Bebas Neue', sans-serif;
+    font-size:19px;
+    letter-spacing:0.12em;
+    cursor:pointer;
+    transition:all 0.15s;
+  }
+  .btn-secondary.ready{
+    color:var(--accent);
+    border-color:var(--accent-dim);
+    background:linear-gradient(180deg, rgba(232,179,74,0.08), transparent);
+  }
+  .btn-secondary:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+
+  .progress{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin-top:20px;
+  }
+  .dot{
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--line);
+    transition:background 0.2s;
+  }
+  .dot.done{background:var(--accent);}
+  .dot.current{background:var(--paper); box-shadow:0 0 6px var(--paper);}
+
+  @media (max-width:380px){
+    h1.title{font-size:52px;}
+    .redact-wrap{height:170px;}
+    .word-text{font-size:32px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <section id="screen-setup">
+    <p class="eyebrow">Classified · Pass &amp; Play</p>
+    <h1 class="title">IMPOSTER</h1>
+    <p class="subtitle">One agent doesn't know the word</p>
+
+    <div class="card">
+      <div class="stamp">Top Secret</div>
+
+      <p class="field-label">Agents</p>
+      <div class="stepper">
+        <button class="step-btn" id="btn-minus" aria-label="Fewer players">&minus;</button>
+        <div>
+          <div class="stepper-count" id="player-count">3</div>
+          <span class="stepper-sub">Players · min 3</span>
+        </div>
+        <button class="step-btn" id="btn-plus" aria-label="More players">&plus;</button>
+      </div>
+
+      <p class="field-label">Category</p>
+      <div class="categories" id="categories"></div>
+
+      <button class="btn-primary" id="btn-start" disabled>Begin Briefing</button>
+      <p class="hint" id="setup-hint">Select a category to continue</p>
+    </div>
+  </section>
+
+  <section id="screen-pass" class="hidden">
+    <p class="pass-label" id="pass-of">AGENT 1 OF 5</p>
+    <h1 class="pass-name" id="pass-name">PLAYER 1</h1>
+    <p class="pass-instruction">Hand the device over. Press and hold the panel below to view your assignment, then release to conceal it again.</p>
+
+    <div class="redact-wrap">
+      <div class="category-tag" id="reveal-category">ANIMALS</div>
+      <div class="redact-content" id="reveal-content"></div>
+      <div class="redact-bar" id="redact-bar">
+        <div class="redact-label">
+          HOLD TO VIEW
+          <small>release to hide</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="btn-next" disabled>Next Agent</button>
+    </div>
+
+    <div class="progress" id="progress"></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var WORDS = {
+    animals: {
+      label: "Animals",
+      glyph: "🐾",
+      list: ["Elephant","Giraffe","Penguin","Octopus","Kangaroo","Dolphin","Cheetah","Owl","Crocodile","Flamingo","Panda","Hedgehog","Peacock","Otter","Chameleon","Walrus","Koala","Scorpion","Falcon","Raccoon"]
+    },
+    household: {
+      label: "Household",
+      glyph: "🏠",
+      list: ["Toaster","Umbrella","Pillow","Candle","Mirror","Kettle","Blender","Ladder","Scissors","Thermostat","Vacuum","Corkscrew","Doormat","Lampshade","Colander","Stapler","Clothespin","Whisk","Bookend","Radiator"]
+    },
+    films: {
+      label: "Films",
+      glyph: "🎬",
+      list: ["Jaws","Titanic","Inception","Gladiator","Frozen","Jumanji","Psycho","Casablanca","Rocky","Alien","Ghostbusters","The Matrix","Avatar","Grease","Shrek","Coco","Up","Tenet","Dune","Moana"]
+    }
+  };
+
+  var state = {
+    playerCount: 3,
+    category: null,
+    word: null,
+    imposterIndex: null,
+    currentPlayer: 0,
+    hasViewedCurrent: false
+  };
+
+  var elSetup = document.getElementById('screen-setup');
+  var elPass = document.getElementById('screen-pass');
+  var elCount = document.getElementById('player-count');
+  var elMinus = document.getElementById('btn-minus');
+  var elPlus = document.getElementById('btn-plus');
+  var elCategories = document.getElementById('categories');
+  var elStart = document.getElementById('btn-start');
+  var elHint = document.getElementById('setup-hint');
+
+  var elPassOf = document.getElementById('pass-of');
+  var elPassName = document.getElementById('pass-name');
+  var elRevealCategory = document.getElementById('reveal-category');
+  var elRevealContent = document.getElementById('reveal-content');
+  var elRedactBar = document.getElementById('redact-bar');
+  var elNext = document.getElementById('btn-next');
+  var elProgress = document.getElementById('progress');
+
+  var MIN_PLAYERS = 3;
+  var MAX_PLAYERS = 12;
+
+  function renderCategories(){
+    elCategories.innerHTML = '';
+    Object.keys(WORDS).forEach(function(key){
+      var cat = WORDS[key];
+      var btn = document.createElement('button');
+      btn.className = 'cat-btn' + (state.category === key ? ' selected' : '');
+      btn.innerHTML = '<span class="glyph">' + cat.glyph + '</span><span>' + cat.label + '</span>';
+      btn.addEventListener('click', function(){
+        state.category = key;
+        renderCategories();
+        updateStartState();
+      });
+      elCategories.appendChild(btn);
+    });
+  }
+
+  function updateCountDisplay(){
+    elCount.textContent = state.playerCount;
+    elMinus.disabled = state.playerCount <= MIN_PLAYERS;
+    elPlus.disabled = state.playerCount >= MAX_PLAYERS;
+  }
+
+  function updateStartState(){
+    var ready = !!state.category && state.playerCount >= MIN_PLAYERS;
+    elStart.disabled = !ready;
+    elHint.textContent = ready
+      ? state.playerCount + ' players · ' + WORDS[state.category].label
+      : 'Select a category to continue';
+  }
+
+  elMinus.addEventListener('click', function(){
+    if (state.playerCount > MIN_PLAYERS){
+      state.playerCount--;
+      updateCountDisplay();
+      updateStartState();
+    }
+  });
+  elPlus.addEventListener('click', function(){
+    if (state.playerCount < MAX_PLAYERS){
+      state.playerCount++;
+      updateCountDisplay();
+      updateStartState();
+    }
+  });
+
+  elStart.addEventListener('click', startGame);
+
+  function startGame(){
+    var cat = WORDS[state.category];
+    var word = cat.list[Math.floor(Math.random() * cat.list.length)];
+    var imposterIndex = Math.floor(Math.random() * state.playerCount);
+
+    state.word = word;
+    state.imposterIndex = imposterIndex;
+    state.currentPlayer = 0;
+    state.hasViewedCurrent = false;
+
+    elSetup.classList.add('hidden');
+    elPass.classList.remove('hidden');
+    renderPassScreen();
+  }
+
+  function renderPassScreen(){
+    var n = state.currentPlayer;
+    var cat = WORDS[state.category];
+
+    elPassOf.textContent = 'AGENT ' + (n + 1) + ' OF ' + state.playerCount;
+    elPassName.textContent = 'PLAYER ' + (n + 1);
+    elRevealCategory.textContent = cat.label.toUpperCase();
+
+    var isImposter = (n === state.imposterIndex);
+    if (isImposter){
+      elRevealContent.innerHTML = '<div class="imposter-text">YOU ARE THE<br>IMPOSTER</div>';
+    } else {
+      elRevealContent.innerHTML = '<div class="word-text">' + escapeHtml(state.word) + '</div>';
+    }
+
+    state.hasViewedCurrent = false;
+    elRedactBar.classList.remove('lifted');
+    elNext.disabled = true;
+    elNext.classList.remove('ready');
+    elNext.textContent = (n === state.playerCount - 1) ? 'Finish' : 'Next Agent';
+
+    renderProgress();
+  }
+
+  function renderProgress(){
+    elProgress.innerHTML = '';
+    for (var i = 0; i < state.playerCount; i++){
+      var dot = document.createElement('div');
+      dot.className = 'dot' +
+        (i < state.currentPlayer ? ' done' : '') +
+        (i === state.currentPlayer ? ' current' : '');
+      elProgress.appendChild(dot);
+    }
+  }
+
+  function escapeHtml(str){
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  function reveal(){
+    elRedactBar.classList.add('lifted');
+    if (!state.hasViewedCurrent){
+      state.hasViewedCurrent = true;
+      elNext.disabled = false;
+      elNext.classList.add('ready');
+    }
+  }
+  function conceal(){
+    elRedactBar.classList.remove('lifted');
+  }
+
+  elRedactBar.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    reveal();
+  });
+  elRedactBar.addEventListener('pointerup', conceal);
+  elRedactBar.addEventListener('pointercancel', conceal);
+  elRedactBar.addEventListener('pointerleave', conceal);
+  elRedactBar.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+
+  elNext.addEventListener('click', function(){
+    if (elNext.disabled) return;
+
+    if (state.currentPlayer >= state.playerCount - 1){
+      endRound();
+    } else {
+      state.currentPlayer++;
+      renderPassScreen();
+    }
+  });
+
+  function endRound(){
+    elPass.classList.add('hidden');
+    elSetup.classList.remove('hidden');
+    updateCountDisplay();
+    updateStartState();
+  }
+
+  renderCategories();
+  updateCountDisplay();
+  updateStartState();
+
+})();
+</script>
+
+</body>
+</html>
